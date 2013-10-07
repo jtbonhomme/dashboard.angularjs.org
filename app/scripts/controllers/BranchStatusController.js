@@ -69,42 +69,20 @@ ShaCountCard.prototype.update = function(count) {
 
 app.controller('BranchStatusController', function BranchStatusController($scope, schedule, jenkins, github) {
   var masterBuildCard = new BuildCard();
-  var stableBuildCard = new BuildCard();
   var masterGoogle3Card = new Google3Card();
-  var stableGoogle3Card = new Google3Card();
-  var masterReleaseCard = new ShaCountCard();
-  var stableReleaseCard = new ShaCountCard();
 
   $scope.branches = [{
     title: 'master',
-    cards: [masterBuildCard, masterGoogle3Card, masterReleaseCard]
-  }, {
-    title: 'stable/1.0',
-    cards: [stableBuildCard, stableGoogle3Card, stableReleaseCard]
+    cards: [masterBuildCard, masterGoogle3Card]
   }];
 
   schedule.onceAMinute(function() {
-    jenkins.buildStatus('angular.js-angular-master').then(function(buildStatus) {
+    jenkins.buildStatus('angular.dart-master').then(function(buildStatus) {
       masterBuildCard.update(buildStatus.happy, buildStatus.since);
     });
 
-    jenkins.buildStatus('angular.js-angular-v1.0.x').then(function(buildStatus) {
-      stableBuildCard.update(buildStatus.happy, buildStatus.since);
-    });
-
-    github.getSHAsSince('master', 'g3_v1_x').then(function(count) {
+    github.getSHAsSince('master', 'g3v1x').then(function(count) {
       masterGoogle3Card.update(count);
     });
-    github.getSHAsSince('v1.0.x', 'g3_v1_0').then(function(count) {
-      stableGoogle3Card.update(count);
-    });
-
-    github.getSHAsSinceRelease('master').then(function(count) {
-      masterReleaseCard.update(count);
-    });
-
-    github.getSHAsSinceRelease('v1.0.x').then(function(count) {
-      stableReleaseCard.update(count);
-    })
   });
 });
